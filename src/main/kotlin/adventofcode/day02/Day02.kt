@@ -37,8 +37,7 @@ private val operations: Map<Opcode, Operation> =
         Halt.opcode to Halt
     )
 
-// --- Programms and Memory ---
-
+// --- Program and Memory ---
 
 typealias Program = List<Int>
 

@@ -90,12 +90,23 @@ internal fun eval(values: Program): List<Int> {
     return memory.dump()
 }
 
+fun findPhrase(program: Program, goal: Int): String? {
+    val params = (0..99).flatMap { p1 -> (0..99).map { p2 -> Pair(p1, p2) } }
+    return params.firstOrNull { pair ->
+        val memory = Memory(program).also {
+            it[1] = pair.first
+            it[2] = pair.second
+        }
+        memory.runProgram() == goal
+    }?.let {
+        "${100 * it.first + it.second}"
+    }
+}
+
 // --- Main ---
 
 fun main() {
-    val memory = Memory(loadProgram("./input/day02.txt"))
-    memory[1] = 12
-    memory[2] = 2
-
-    println(memory.runProgram())
+    val program = loadProgram("./input/day02.txt")
+    val goal = 19690720
+    println(findPhrase(program, goal))
 }

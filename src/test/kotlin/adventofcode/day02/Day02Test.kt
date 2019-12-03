@@ -40,6 +40,12 @@ class Day02Test {
         assertThat(memory.runProgram()).isEqualTo(11590668)
     }
 
+    @Test
+    fun `find phrase`() {
+        val program = loadProgram("./input/day02.txt")
+        assertThat(findPhrase(program, 19690720)).isEqualTo("2254")
+    }
+
 }
 
 class OperationTest {

@@ -44,13 +44,11 @@ fun String.toMove(): Move {
     }
 }
 
-fun String.trace(): Trace =
-    split(",")
-        .map(String::toMove)
-        .fold(initialTrace()) { acc, move -> acc + move.generateTrace(acc.last()) }
-
-private fun initialTrace(): Trace =
-    listOf(port)
+fun String.trace(): Trace {
+    val initialTrace = listOf(port)
+    val moves = split(",").map(String::toMove)
+    return moves.fold(initialTrace) { acc, move -> acc + move.generateTrace(acc.last()) }
+}
 
 fun distToNearestIntersect(tr1: Trace, tr2: Trace): Int? =
     tr1.drop(1).intersect(tr2.drop(1)).map { it.dist() }.min()

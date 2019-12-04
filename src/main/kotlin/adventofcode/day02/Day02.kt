@@ -10,7 +10,7 @@ typealias Opcode = Int
 sealed class Operation(val opcode: Opcode, val arity: Int) {
 
     operator fun invoke(parameters: List<Int>): Int? {
-        if (parameters.size < arity) throw IllegalArgumentException("too few parameters")
+        if (parameters.size < arity) throw IllegalArgumentException("too many parameters")
         return eval(parameters)
     }
 
@@ -31,11 +31,7 @@ sealed class Operation(val opcode: Opcode, val arity: Int) {
 }
 
 private val operations: Map<Opcode, Operation> =
-    mapOf(
-        Add.opcode to Add,
-        Mult.opcode to Mult,
-        Halt.opcode to Halt
-    )
+    listOf(Add, Mult, Halt).associateBy { it.opcode }
 
 // --- Program and Memory ---
 

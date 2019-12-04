@@ -9,9 +9,11 @@ data class Point(val x: Int, val y: Int) {
 
     operator fun plus(other: Point) = copy(x = x + other.x, y = y + other.y)
 
-    fun dist(other: Point = Point(0, 0)): Int = abs(x - other.x) + abs(y - other.y)
+    fun dist(other: Point = port): Int = abs(x - other.x) + abs(y - other.y)
 
 }
+
+val port = Point(0, 0)
 
 typealias Vector = Point
 
@@ -48,7 +50,7 @@ fun String.trace(): Trace =
         .fold(initialTrace()) { acc, move -> acc + move.generateTrace(acc.last()) }
 
 private fun initialTrace(): Trace =
-    listOf(Point(0, 0))
+    listOf(port)
 
 fun distToNearestIntersect(tr1: Trace, tr2: Trace): Int? =
     tr1.drop(1).intersect(tr2.drop(1)).map { it.dist() }.min()

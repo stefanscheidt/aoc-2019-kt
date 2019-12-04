@@ -1,13 +1,21 @@
 package adventofcode.day02
 
-import adventofcode.day02.Operation.*
 import java.io.File
 
 // --- Operations ---
 
 typealias Opcode = Int
 
-sealed class Operation(val opcode: Opcode, val arity: Int) {
+enum class Operation(val opcode: Opcode, val arity: Int) {
+    ADD(1, 2) {
+        override fun eval(params: List<Int>): Int? = params[0] + params[1]
+    },
+    MULT(2, 2) {
+        override fun eval(params: List<Int>): Int? = params[0] * params[1]
+    },
+    HALT(99, 0) {
+        override fun eval(params: List<Int>): Int? = null
+    };
 
     operator fun invoke(parameters: List<Int>): Int? {
         if (parameters.size < arity) throw IllegalArgumentException("too many parameters")
@@ -16,22 +24,10 @@ sealed class Operation(val opcode: Opcode, val arity: Int) {
 
     protected abstract fun eval(params: List<Int>): Int?
 
-    object Add : Operation(1, 2) {
-        override fun eval(params: List<Int>): Int? = params[0] + params[1]
-    }
-
-    object Mult : Operation(2, 2) {
-        override fun eval(params: List<Int>): Int? = params[0] * params[1]
-    }
-
-    object Halt : Operation(99, 0) {
-        override fun eval(params: List<Int>): Int? = null
-    }
-
 }
 
 private val operations: Map<Opcode, Operation> =
-    listOf(Add, Mult, Halt).associateBy { it.opcode }
+    Operation.values().associateBy { it.opcode }
 
 // --- Program and Memory ---
 

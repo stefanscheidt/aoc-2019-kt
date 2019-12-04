@@ -52,23 +52,23 @@ class OperationTest {
 
     @Test
     fun `add two numbers`() {
-        assertThat(Add(listOf(1, 2))).isEqualTo(3)
+        assertThat(ADD(listOf(1, 2))).isEqualTo(3)
     }
 
     @Test
     fun `multiply to numbers`() {
-        assertThat(Mult(listOf(2, 3))).isEqualTo(6)
+        assertThat(MULT(listOf(2, 3))).isEqualTo(6)
     }
 
     @Test
     fun `halt programm`() {
-        assertThat(Halt(emptyList())).isNull()
+        assertThat(HALT(emptyList())).isNull()
     }
 
     @Test
     fun `too few params`() {
         assertThrows<IllegalArgumentException> {
-            Add(listOf(1))
+            ADD(listOf(1))
         }
     }
 

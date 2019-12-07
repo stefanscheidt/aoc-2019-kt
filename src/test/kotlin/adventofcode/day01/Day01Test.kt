@@ -10,9 +10,9 @@ class Day01Test {
 
     @Test
     fun `fuel for module`() {
-        assertThat(fuelForModuleWithMass(14.toMass())).isEqualTo(2.toFuel())
-        assertThat(fuelForModuleWithMass(1969.toMass())).isEqualTo(966.toFuel())
-        assertThat(fuelForModuleWithMass(100756.toMass())).isEqualTo(50346.toFuel())
+        assertThat(fuelForModuleWithMass(14)).isEqualTo(2)
+        assertThat(fuelForModuleWithMass(1969)).isEqualTo(966)
+        assertThat(fuelForModuleWithMass(100756)).isEqualTo(50346)
     }
 
     @Test

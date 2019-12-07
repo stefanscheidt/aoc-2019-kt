@@ -4,6 +4,7 @@ import adventofcode.day03.Move.*
 import java.io.File
 import kotlin.math.abs
 
+// --- Points
 
 data class Point(val x: Int, val y: Int) {
 
@@ -14,6 +15,8 @@ data class Point(val x: Int, val y: Int) {
 }
 
 val port = Point(0, 0)
+
+// --- Moves and Traces
 
 typealias Vector = Point
 
@@ -31,10 +34,10 @@ sealed class Move(val vector: Vector, val steps: Int) {
 
 }
 
-fun String.toMove(): Move {
-    if (this.length < 2) throw IllegalArgumentException("invalid move $this")
-    val code = this[0]
-    val steps = this.substring(1).toInt()
+private fun parseMove(move: String): Move {
+    if (move.length < 2) throw IllegalArgumentException("invalid move $move")
+    val code = move[0]
+    val steps = move.substring(1).toInt()
     return when (code) {
         'U'  -> Up(steps)
         'D'  -> Down(steps)
@@ -44,18 +47,33 @@ fun String.toMove(): Move {
     }
 }
 
-fun String.trace(): Trace {
+fun traceOf(moves: String): List<Point> {
     val initialTrace = listOf(port)
-    val moves = split(",").map(String::toMove)
-    return moves.fold(initialTrace) { acc, move -> acc + move.generateTrace(acc.last()) }
+    return moves.split(",")
+        .map(::parseMove)
+        .fold(initialTrace) { acc, move -> acc + move.generateTrace(acc.last()) }
+        .drop(1)
 }
 
-fun distToNearestIntersect(tr1: Trace, tr2: Trace): Int? =
-    tr1.drop(1).intersect(tr2.drop(1)).map { it.dist() }.min()
+// --- Trace functions
+
+fun intersectionsOf(tr1: Trace, tr2: Trace): Set<Point> = tr1.intersect(tr2)
+
+fun distanceToNearestIntersectionOf(tr1: Trace, tr2: Trace): Int? =
+    intersectionsOf(tr1, tr2).map { it.dist() }.min()
+
+fun stepsToPoint(point: Point, trace: Trace): Int =
+    trace.takeWhile { it != point }.count() + 1
+
+fun minimalWireSteps(tr1: Trace, tr2: Trace): Int? =
+    intersectionsOf(tr1, tr2).map { stepsToPoint(it, tr1) + stepsToPoint(it, tr2) }.min()
+
+// --- Main
 
 fun main() {
     val lines = File("./input/day03.txt").readLines()
-    val tr1 = lines[0].trace()
-    val tr2 = lines[1].trace()
-    println(distToNearestIntersect(tr1, tr2))
+    val tr1 = traceOf(lines[0])
+    val tr2 = traceOf(lines[1])
+    println("Part 1: ${distanceToNearestIntersectionOf(tr1, tr2)}")
+    println("Part 2: ${minimalWireSteps(tr1, tr2)}")
 }

@@ -4,8 +4,9 @@ import java.io.File
 
 
 fun main() {
-    val spaceMap = File("./input/day06.txt").readText()
-    println(orbitsOf(parseSpaceMap(spaceMap)))
+    val spaceMap = parseSpaceMap(File("./input/day06.txt").readText())
+    println("Part 1: ${spaceMap.numberOfOrbits()}")
+    println("Part 2: ${spaceMap.numberOfOrbitalTransfers("YOU" to "SAN")}")
 }
 
 // --- Objects in Space
@@ -21,12 +22,36 @@ data class ObjectInSpace(
         "${center?.name ?: "/"})$name"
 }
 
+// --- Path
+
+typealias Path = List<ObjectInSpace>
+
+fun pathTo(objectInSpace: ObjectInSpace): Path =
+    generateSequence(objectInSpace.center, ObjectInSpace::center).toList().reversed()
+
 // --- Map
 
 typealias SpaceMap = Set<ObjectInSpace>
 
-internal fun orbitsOf(objectsInSpace: SpaceMap) =
-    objectsInSpace.map(ObjectInSpace::numberOfOrbits).sum()
+fun SpaceMap.numberOfOrbits(): Int =
+    this.map(ObjectInSpace::numberOfOrbits).sum()
+
+fun SpaceMap.findObjectByName(name: String): ObjectInSpace? =
+    this.find { it.name == name }
+
+fun SpaceMap.numberOfOrbitalTransfers(startToDestination: Pair<String, String>): Int {
+    fun find(name: String): ObjectInSpace {
+        val obj = this.findObjectByName(name) ?: throw IllegalArgumentException("$name not found in map")
+        if (obj.center == null) throw IllegalArgumentException("$name has no center.")
+        return obj
+    }
+
+    val pathToStart = pathTo(find(startToDestination.first))
+    val pathToDestination = pathTo(find(startToDestination.second))
+    val indexOfLastSharedObject = pathToStart.zip(pathToDestination).count { it.first == it.second }
+
+    return (pathToStart.size - indexOfLastSharedObject) + (pathToDestination.size - indexOfLastSharedObject)
+}
 
 // --- Parse Space Map
 

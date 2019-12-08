@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.io.File
 
+@Suppress("GrazieInspection")
 private val example01 = """
     COM)B
     B)C
@@ -18,30 +19,47 @@ private val example01 = """
     K)L
     """.trimIndent()
 
+@Suppress("GrazieInspection")
+private val example02 = """
+    COM)B
+    B)C
+    C)D
+    D)E
+    E)F
+    B)G
+    G)H
+    D)I
+    E)J
+    J)K
+    K)L
+    K)YOU
+    I)SAN
+""".trimIndent()
+
 val com = ObjectInSpace("COM")
 
 class Day06Test {
 
     @Test
-    fun `should comput orbits for input`() {
-        val spaceMap = File("./input/day06.txt").readText()
-        assertThat(orbitsOf(parseSpaceMap(spaceMap))).isEqualTo(224901)
+    fun `should compute orbits for input`() {
+        val spaceMap = parseSpaceMap(File("./input/day06.txt").readText())
+        assertThat(spaceMap.numberOfOrbits()).isEqualTo(224901)
     }
 
     @Test
     fun `shoud compute total number of orbits for example 1`() {
-        assertThat(orbitsOf(parseSpaceMap(example01))).isEqualTo(42)
+        assertThat(parseSpaceMap(example01).numberOfOrbits()).isEqualTo(42)
     }
 
     @Test
     fun `number of orbits of com is zero`() {
-        assertThat(orbitsOf(setOf(com))).isEqualTo(0)
+        assertThat(setOf(com).numberOfOrbits()).isEqualTo(0)
     }
 
     @Test
     fun `number of orbits of com with one satellite is one`() {
         val a = ObjectInSpace("A", com)
-        assertThat(orbitsOf(setOf(com, a))).isEqualTo(1)
+        assertThat(setOf(com, a).numberOfOrbits()).isEqualTo(1)
     }
 
     @Test
@@ -49,7 +67,7 @@ class Day06Test {
         val a = ObjectInSpace("A", com)
         val b = ObjectInSpace("B", com)
         val c = ObjectInSpace("C", b)
-        assertThat(orbitsOf(setOf(com, a, b, c))).isEqualTo(4)
+        assertThat(setOf(com, a, b, c).numberOfOrbits()).isEqualTo(4)
     }
 
     @Test
@@ -65,6 +83,33 @@ class Day06Test {
             ${a.name})${d.name}
         """.trimIndent()
         assertThat(parseSpaceMap(spaceMap)).containsExactlyInAnyOrder(com, a, b, c, d)
+    }
+
+    @Test
+    fun `path to object`() {
+        val a = ObjectInSpace("A", com)
+        val b = ObjectInSpace("B", a)
+        val c = ObjectInSpace("C", b)
+        val d = ObjectInSpace("D", a)
+
+        assertThat(pathTo(com)).isEmpty()
+        assertThat(pathTo(a)).isEqualTo(listOf(com))
+        assertThat(pathTo(c)).isEqualTo(listOf(com, a, b))
+        assertThat(pathTo(d)).isEqualTo(listOf(com, a))
+
+        assertThat(pathTo(ObjectInSpace("X"))).isEmpty()
+    }
+
+    @Test
+    fun `number of orbital transfers`() {
+        val spaceMap = parseSpaceMap(example02)
+        assertThat(spaceMap.numberOfOrbitalTransfers("YOU" to "SAN")).isEqualTo(4)
+    }
+
+    @Test
+    fun `should compute number of orbital transfers for input`() {
+        val spaceMap = parseSpaceMap(File("./input/day06.txt").readText())
+        assertThat(spaceMap.numberOfOrbitalTransfers("YOU" to "SAN")).isEqualTo(334)
     }
 
 }

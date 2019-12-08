@@ -36,12 +36,9 @@ typealias SpaceMap = Set<ObjectInSpace>
 fun SpaceMap.numberOfOrbits(): Int =
     this.map(ObjectInSpace::numberOfOrbits).sum()
 
-fun SpaceMap.findObjectByName(name: String): ObjectInSpace? =
-    this.find { it.name == name }
-
 fun SpaceMap.numberOfOrbitalTransfers(startToDestination: Pair<String, String>): Int {
     fun find(name: String): ObjectInSpace {
-        val obj = this.findObjectByName(name) ?: throw IllegalArgumentException("$name not found in map")
+        val obj = this.find { it.name == name } ?: throw IllegalArgumentException("$name not found in map")
         if (obj.center == null) throw IllegalArgumentException("$name has no center.")
         return obj
     }

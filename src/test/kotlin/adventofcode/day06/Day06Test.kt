@@ -43,6 +43,7 @@ class Day06Test {
     @Test
     fun `should compute orbits for input`() {
         val spaceMap = parseSpaceMap(File("./input/day06.txt").readText())
+
         assertThat(spaceMap.numberOfOrbits()).isEqualTo(224901)
     }
 
@@ -59,6 +60,7 @@ class Day06Test {
     @Test
     fun `number of orbits of com with one satellite is one`() {
         val a = ObjectInSpace("A", com)
+
         assertThat(setOf(com, a).numberOfOrbits()).isEqualTo(1)
     }
 
@@ -67,6 +69,7 @@ class Day06Test {
         val a = ObjectInSpace("A", com)
         val b = ObjectInSpace("B", com)
         val c = ObjectInSpace("C", b)
+
         assertThat(setOf(com, a, b, c).numberOfOrbits()).isEqualTo(4)
     }
 
@@ -82,6 +85,7 @@ class Day06Test {
             ${b.name})${c.name}
             ${a.name})${d.name}
         """.trimIndent()
+
         assertThat(parseSpaceMap(spaceMap)).containsExactlyInAnyOrder(com, a, b, c, d)
     }
 
@@ -103,12 +107,14 @@ class Day06Test {
     @Test
     fun `number of orbital transfers`() {
         val spaceMap = parseSpaceMap(example02)
+
         assertThat(spaceMap.numberOfOrbitalTransfers("YOU" to "SAN")).isEqualTo(4)
     }
 
     @Test
     fun `should compute number of orbital transfers for input`() {
         val spaceMap = parseSpaceMap(File("./input/day06.txt").readText())
+
         assertThat(spaceMap.numberOfOrbitalTransfers("YOU" to "SAN")).isEqualTo(334)
     }
 

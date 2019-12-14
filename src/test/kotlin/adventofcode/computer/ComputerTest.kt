@@ -34,6 +34,37 @@ class ComputerTest {
         assertThat(result).isEqualTo(1002)
     }
 
+    @Test
+    fun `should compare and jump`() {
+        val p1 = listOf(3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8)
+        assertThat(runProgramWithInput(p1, 7)).containsExactly(0)
+        assertThat(runProgramWithInput(p1, 8)).containsExactly(1)
+        assertThat(runProgramWithInput(p1, 9)).containsExactly(0)
+
+        val p2 = listOf(3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8)
+        assertThat(runProgramWithInput(p2, 7)).containsExactly(1)
+        assertThat(runProgramWithInput(p2, 8)).containsExactly(0)
+        assertThat(runProgramWithInput(p2, 9)).containsExactly(0)
+
+        val p3 = listOf(3, 3, 1108, -1, 8, 3, 4, 3, 99)
+        assertThat(runProgramWithInput(p3, 7)).containsExactly(0)
+        assertThat(runProgramWithInput(p3, 8)).containsExactly(1)
+        assertThat(runProgramWithInput(p3, 9)).containsExactly(0)
+
+        val p4 = listOf(3, 3, 1107, -1, 8, 3, 4, 3, 99)
+        assertThat(runProgramWithInput(p4, 7)).containsExactly(1)
+        assertThat(runProgramWithInput(p4, 8)).containsExactly(0)
+        assertThat(runProgramWithInput(p4, 9)).containsExactly(0)
+
+        val p5 = listOf(3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9)
+        assertThat(runProgramWithInput(p5, 0)).containsExactly(0)
+        assertThat(runProgramWithInput(p5, 1)).containsExactly(1)
+
+        val p6 = listOf(3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1)
+        assertThat(runProgramWithInput(p6, 0)).containsExactly(0)
+        assertThat(runProgramWithInput(p6, 1)).containsExactly(1)
+    }
+
 }
 
 class ParameterModesTest {

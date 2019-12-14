@@ -7,36 +7,54 @@ import java.io.File
 
 typealias Opcode = Int
 
+data class Result(val value: Int?, val pointer: Int? = null)
+
 enum class Operation(val opcode: Opcode, val arity: Int) {
     ADD(1, 2) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): Int? =
-            args[0] + args[1]
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Result =
+            Result(args[0] + args[1])
     },
     MULT(2, 2) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): Int? =
-            args[0] * args[1]
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Result =
+            Result(args[0] * args[1])
     },
     READ(3, 0) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): Int? =
-            inOut.nextInt()
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Result =
+            Result(inOut.nextInt())
     },
     WRITE(4, 1) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): Int? {
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Result {
             inOut.writeInt(args[0])
-            return null
+            return Result(null)
         }
     },
+    JUMP_TRUE(5, 2) {
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Result =
+            if (args[0] != 0) Result(null, args[1]) else Result(null)
+    },
+    JUMP_FALSE(6, 2) {
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Result =
+            if (args[0] == 0) Result(null, args[1]) else Result(null)
+    },
+    LESS_THAN(7, 2) {
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Result =
+            Result(if (args[0] < args[1]) 1 else 0)
+    },
+    EQUALS(8, 2) {
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Result =
+            Result(if (args[0] == args[1]) 1 else 0)
+    },
     HALT(99, 0) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): Int? =
-            null
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Result =
+            Result(null)
     };
 
-    operator fun invoke(args: List<Int>, inOut: InputOutputDevice): Int? {
+    operator fun invoke(args: List<Int>, inOut: InputOutputDevice): Result {
         if (args.size != arity) throw IllegalArgumentException("wrong number of arguments")
         return eval(args, inOut)
     }
 
-    protected abstract fun eval(args: List<Int>, inOut: InputOutputDevice): Int?
+    protected abstract fun eval(args: List<Int>, inOut: InputOutputDevice): Result
 
 }
 
@@ -69,7 +87,11 @@ class Memory(program: Program) {
             val modes = parameterModes(header / 100)
             val operation = operations[opcode] ?: throw IllegalArgumentException("unknown opcode")
             val args = args(operation, modes, ptr).also { ptr += operation.arity }
-            operation(args, inOut)?.let { ram[ram[ptr++]] = it }
+            val result = operation(args, inOut)
+            if (result.pointer != null)
+                ptr = result.pointer
+            else
+                result.value?.let { ram[ram[ptr++]] = it }
         } while (operation != HALT)
         return ram[0]
     }
@@ -138,3 +160,7 @@ class Computer(
         memory.dump()
 
 }
+
+fun runProgramWithInput(program: List<Int>, input: Int): List<Int> =
+    Computer(program, listOf(input)).apply { runProgramm() }.output
+

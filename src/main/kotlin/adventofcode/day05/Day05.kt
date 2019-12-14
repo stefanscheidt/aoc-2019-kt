@@ -1,13 +1,11 @@
 package adventofcode.day05
 
-import adventofcode.computer.Computer
 import adventofcode.computer.loadProgram
+import adventofcode.computer.runProgramWithInput
 
 
 fun main() {
     val program = loadProgram("./input/day05.txt")
-    val computer = Computer(program, listOf(1)).apply {
-        runProgramm()
-    }
-    println(computer.output)
+    println("Part 1: ${runProgramWithInput(program, 1)}")
+    println("Part 2: ${runProgramWithInput(program, 5)}")
 }

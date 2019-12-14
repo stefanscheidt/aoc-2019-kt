@@ -9,17 +9,17 @@ class OperationTest {
 
     @Test
     fun `add two numbers`() {
-        assertThat(Operation.ADD(listOf(1, 2), InputOutputDevice())).isEqualTo(3)
+        assertThat(Operation.ADD(listOf(1, 2), InputOutputDevice())).isEqualTo(Result(3))
     }
 
     @Test
     fun `multiply to numbers`() {
-        assertThat(Operation.MULT(listOf(2, 3), InputOutputDevice())).isEqualTo(6)
+        assertThat(Operation.MULT(listOf(2, 3), InputOutputDevice())).isEqualTo(Result(6))
     }
 
     @Test
     fun `halt programm`() {
-        assertThat(Operation.HALT(emptyList(), InputOutputDevice())).isNull()
+        assertThat(Operation.HALT(emptyList(), InputOutputDevice())).isEqualTo(Result(null))
     }
 
     @Test

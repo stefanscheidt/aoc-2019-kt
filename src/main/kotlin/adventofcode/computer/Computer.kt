@@ -64,22 +64,28 @@ class Memory(program: Program) {
     fun runProgram(inOut: InputOutputDevice = InputOutputDevice()): Int {
         var ptr = 0
         do {
-            val op = operation(ptr++)
-            val args = args(op, ptr).also { ptr += op.arity }
-            op(args, inOut)?.let { ram[ram[ptr++]] = it }
-        } while (op != HALT)
+            val header = ram[ptr++]
+            val opcode = header % 100
+            val modes = parameterModes(header / 100)
+            val operation = operations[opcode] ?: throw IllegalArgumentException("unknown opcode")
+            val args = args(operation, modes, ptr).also { ptr += operation.arity }
+            operation(args, inOut)?.let { ram[ram[ptr++]] = it }
+        } while (operation != HALT)
         return ram[0]
     }
 
-    private fun operation(pointer: Int) =
-        operations[ram[pointer]] ?: throw IllegalArgumentException("unknown opcode")
-
-    private fun args(operation: Operation, pointer: Int): List<Int> {
+    private fun args(operation: Operation, parameterModes: Iterator<Int>, pointer: Int): List<Int> {
         if (operation.arity == 0) return emptyList()
-        return ram.slice(pointer until pointer + operation.arity).map { ram[it] }
+        return ram.slice(pointer until pointer + operation.arity)
+            .map { if (parameterModes.next() == 0) ram[it] else it }
     }
 
 }
+
+internal fun parameterModes(pmcode: Int): Iterator<Int> =
+    generateSequence(Pair(pmcode % 10, pmcode / 10)) { Pair(it.second % 10, it.second / 10) }
+        .map { it.first }
+        .iterator()
 
 // --- Utilities ---
 

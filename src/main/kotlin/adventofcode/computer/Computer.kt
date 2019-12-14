@@ -1,5 +1,6 @@
 package adventofcode.computer
 
+import adventofcode.computer.Operation.HALT
 import java.io.File
 
 // --- Operations ---
@@ -8,30 +9,43 @@ typealias Opcode = Int
 
 enum class Operation(val opcode: Opcode, val arity: Int) {
     ADD(1, 2) {
-        override fun eval(params: List<Int>): Int? = params[0] + params[1]
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Int? =
+            args[0] + args[1]
     },
     MULT(2, 2) {
-        override fun eval(params: List<Int>): Int? = params[0] * params[1]
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Int? =
+            args[0] * args[1]
+    },
+    READ(3, 0) {
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Int? =
+            inOut.nextInt()
+    },
+    WRITE(4, 1) {
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Int? {
+            inOut.writeInt(args[0])
+            return null
+        }
     },
     HALT(99, 0) {
-        override fun eval(params: List<Int>): Int? = null
+        override fun eval(args: List<Int>, inOut: InputOutputDevice): Int? =
+            null
     };
 
-    operator fun invoke(parameters: List<Int>): Int? {
-        if (parameters.size < arity) throw IllegalArgumentException("too many parameters")
-        return eval(parameters)
+    operator fun invoke(args: List<Int>, inOut: InputOutputDevice): Int? {
+        if (args.size != arity) throw IllegalArgumentException("wrong number of arguments")
+        return eval(args, inOut)
     }
 
-    protected abstract fun eval(params: List<Int>): Int?
+    protected abstract fun eval(args: List<Int>, inOut: InputOutputDevice): Int?
 
 }
 
 private val operations: Map<Opcode, Operation> =
     Operation.values().associateBy { it.opcode }
 
-typealias Program = List<Int>
-
 // --- Program and Memory ---
+
+typealias Program = List<Int>
 
 class Memory(program: Program) {
 
@@ -47,20 +61,20 @@ class Memory(program: Program) {
     fun dump(): List<Int> =
         ram.toList()
 
-    fun runProgram(): Int {
+    fun runProgram(inOut: InputOutputDevice = InputOutputDevice()): Int {
         var ptr = 0
         do {
             val op = operation(ptr++)
-            val params = params(op, ptr).also { ptr += op.arity }
-            val result = op(params)?.let { ram[ram[ptr++]] = it }
-        } while (result != null)
+            val args = args(op, ptr).also { ptr += op.arity }
+            op(args, inOut)?.let { ram[ram[ptr++]] = it }
+        } while (op != HALT)
         return ram[0]
     }
 
     private fun operation(pointer: Int) =
         operations[ram[pointer]] ?: throw IllegalArgumentException("unknown opcode")
 
-    private fun params(operation: Operation, pointer: Int): List<Int> {
+    private fun args(operation: Operation, pointer: Int): List<Int> {
         if (operation.arity == 0) return emptyList()
         return ram.slice(pointer until pointer + operation.arity).map { ram[it] }
     }
@@ -76,8 +90,45 @@ internal fun loadProgram(fileName: String): Program {
         .map { it.toInt() }
 }
 
-internal fun eval(values: Program): List<Int> {
-    val memory = Memory(values)
-    memory.runProgram()
-    return memory.dump()
+internal fun eval(program: Program): List<Int> =
+    Computer(program).run {
+        runProgramm()
+        dumpMemory()
+    }
+
+// --- Computer ---
+
+class InputOutputDevice(input: List<Int> = emptyList()) {
+
+    private val inputStream = input.iterator()
+    private val outputStream = mutableListOf<Int>()
+
+    val output: List<Int>
+        get() = outputStream.toList()
+
+    fun nextInt(): Int =
+        inputStream.next()
+
+    fun writeInt(i: Int) {
+        outputStream.add(i)
+    }
+
+}
+
+class Computer(
+    program: Program,
+    input: List<Int> = emptyList()
+) {
+    private val memory = Memory(program)
+    private val inOut = InputOutputDevice(input)
+
+    val output: List<Int>
+        get() = inOut.output
+
+    fun runProgramm(): Int =
+        memory.runProgram(inOut)
+
+    fun dumpMemory(): List<Int> =
+        memory.dump()
+
 }

@@ -1,86 +1,8 @@
 package adventofcode.day02
 
-import java.io.File
-
-// --- Operations ---
-
-typealias Opcode = Int
-
-enum class Operation(val opcode: Opcode, val arity: Int) {
-    ADD(1, 2) {
-        override fun eval(params: List<Int>): Int? = params[0] + params[1]
-    },
-    MULT(2, 2) {
-        override fun eval(params: List<Int>): Int? = params[0] * params[1]
-    },
-    HALT(99, 0) {
-        override fun eval(params: List<Int>): Int? = null
-    };
-
-    operator fun invoke(parameters: List<Int>): Int? {
-        if (parameters.size < arity) throw IllegalArgumentException("too many parameters")
-        return eval(parameters)
-    }
-
-    protected abstract fun eval(params: List<Int>): Int?
-
-}
-
-private val operations: Map<Opcode, Operation> =
-    Operation.values().associateBy { it.opcode }
-
-// --- Program and Memory ---
-
-typealias Program = List<Int>
-
-class Memory(program: Program) {
-
-    private val ram = program.toMutableList()
-
-    operator fun get(index: Int) =
-        ram[index]
-
-    operator fun set(index: Int, value: Int) {
-        ram[index] = value
-    }
-
-    fun dump(): List<Int> =
-        ram.toList()
-
-    fun runProgram(): Int {
-        var ptr = 0
-        do {
-            val op = operation(ptr++)
-            val params = params(op, ptr).also { ptr += op.arity }
-            val result = op(params)?.let { ram[ram[ptr++]] = it }
-        } while (result != null)
-        return ram[0]
-    }
-
-    private fun operation(pointer: Int) =
-        operations[ram[pointer]] ?: throw IllegalArgumentException("unknown opcode")
-
-    private fun params(operation: Operation, pointer: Int): List<Int> {
-        if (operation.arity == 0) return emptyList()
-        return ram.slice(pointer until pointer + operation.arity).map { ram[it] }
-    }
-
-}
-
-// --- Utilities ---
-
-internal fun loadProgram(fileName: String): Program {
-    return File(fileName)
-        .readLines()[0]
-        .split(",")
-        .map { it.toInt() }
-}
-
-internal fun eval(values: Program): List<Int> {
-    val memory = Memory(values)
-    memory.runProgram()
-    return memory.dump()
-}
+import adventofcode.computer.Memory
+import adventofcode.computer.Program
+import adventofcode.computer.loadProgram
 
 fun findPhrase(program: Program, goal: Int): String? {
     val params = (0..99).flatMap { p1 -> (0..99).map { p2 -> Pair(p1, p2) } }

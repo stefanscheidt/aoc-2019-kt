@@ -1,17 +1,17 @@
 package adventofcode.day02
 
-import adventofcode.computer.Memory
+import adventofcode.computer.Computer
 import adventofcode.computer.Program
 import adventofcode.computer.loadProgram
 
 fun findPhrase(program: Program, goal: Int): String? {
-    val params = (0..99).flatMap { p1 -> (0..99).map { p2 -> Pair(p1, p2) } }
-    return params.firstOrNull { pair ->
-        val memory = Memory(program).also {
+    val args = (0..99).flatMap { p1 -> (0..99).map { p2 -> Pair(p1, p2) } }
+    return args.firstOrNull { pair ->
+        val computer = Computer(program).also {
             it[1] = pair.first
             it[2] = pair.second
         }
-        memory.runProgram() == goal
+        computer.runProgram() == goal
     }?.let {
         "${100 * it.first + it.second}"
     }

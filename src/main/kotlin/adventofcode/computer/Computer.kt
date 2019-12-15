@@ -161,6 +161,6 @@ class Computer(
 
 }
 
-fun runProgramWithInput(program: List<Int>, input: Int): List<Int> =
-    Computer(program, listOf(input)).apply { runProgramm() }.output
+fun runProgramWithInput(program: List<Int>, vararg input: Int): List<Int> =
+    Computer(program, input.toList()).apply { runProgramm() }.output
 

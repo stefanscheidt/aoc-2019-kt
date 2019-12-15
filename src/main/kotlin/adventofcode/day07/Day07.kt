@@ -10,9 +10,7 @@ fun <T> allPermutationsOf(xs: List<T>): Set<List<T>> =
         setOf(xs)
     else
         xs.flatMap { i ->
-            allPermutationsOf(xs - i).map { p ->
-                p + i
-            }
+            allPermutationsOf(xs - i).map { p -> p + i }
         }.toSet()
 
 typealias Settings = List<Int>

@@ -8,14 +8,6 @@ import org.junit.jupiter.api.Test
 class Day07Test {
 
     @Test
-    fun `should compute output signal`() {
-        val program = listOf(3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0)
-        val settings = listOf(4, 3, 2, 1, 0)
-
-        assertThat(amplify(program, settings)).isEqualTo(43210)
-    }
-
-    @Test
     fun `compute all permutations of settings`() {
         assertThat(allPermutationsOf(listOf(1))).containsExactlyInAnyOrder(
             listOf(1)
@@ -37,7 +29,15 @@ class Day07Test {
     }
 
     @Test
-    fun `find optimal settings`() {
+    fun `should compute output signal`() {
+        val program = listOf(3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0)
+        val settings = listOf(4, 3, 2, 1, 0)
+
+        assertThat(amplify(program, settings)).isEqualTo(43210)
+    }
+
+    @Test
+    fun `should find optimal settings`() {
         val program = listOf(3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0)
 
         val optimalOutput = optimalOutput(program)

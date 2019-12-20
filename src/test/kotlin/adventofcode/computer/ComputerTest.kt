@@ -9,32 +9,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 
-class OperationTest {
-
-    @Test
-    fun `add two numbers`() {
-        assertThat(ADD(listOf(1, 2), ListInputOutputDevice())).isEqualTo(OperationResult(3))
-    }
-
-    @Test
-    fun `multiply to numbers`() {
-        assertThat(MULT(listOf(2, 3), ListInputOutputDevice())).isEqualTo(OperationResult(6))
-    }
-
-    @Test
-    fun `halt programm`() {
-        assertThat(HALT(emptyList(), ListInputOutputDevice())).isEqualTo(OperationResult(null))
-    }
-
-    @Test
-    fun `too few params`() {
-        assertThrows<IllegalArgumentException> {
-            ADD(listOf(1), ListInputOutputDevice())
-        }
-    }
-
-}
-
 class ParameterModesTest {
 
     @Test
@@ -48,26 +22,6 @@ class ParameterModesTest {
         assertThat(parameterModes.next()).isEqualTo(0)
     }
 
-}
-
-class QueueInputOutputTest {
-
-    @Test
-    fun `put input and take output`() {
-        val inOut = QueueInputOutputDevice()
-        inOut.putInput(42)
-        inOut.writeInt(inOut.nextInt())
-        assertThat(inOut.takeOutput()).isEqualTo(42)
-    }
-
-    @Test
-    fun `output is put to next device`() {
-        val nextDevice = QueueInputOutputDevice()
-        val inOut = QueueInputOutputDevice(nextDevice)
-
-        inOut.writeInt(42)
-        assertThat(nextDevice.nextInt()).isEqualTo(42)
-    }
 }
 
 class ListComputerTest {

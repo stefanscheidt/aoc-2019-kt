@@ -1,6 +1,6 @@
 package adventofcode.day02
 
-import adventofcode.computer.Computer
+import adventofcode.computer.ListComputer
 import adventofcode.computer.loadProgram
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -10,7 +10,7 @@ class Day02Test {
 
     @Test
     fun `patch and evaluate input`() {
-        val computer = Computer(loadProgram("./input/day02.txt"))
+        val computer = ListComputer(loadProgram("./input/day02.txt"))
         computer[1] = 12
         computer[2] = 2
 

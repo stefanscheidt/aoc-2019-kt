@@ -1,6 +1,10 @@
 package adventofcode.computer
 
+import adventofcode.computer.Operation.*
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Awaitility.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -9,23 +13,23 @@ class OperationTest {
 
     @Test
     fun `add two numbers`() {
-        assertThat(Operation.ADD(listOf(1, 2), InputOutputDevice())).isEqualTo(Result(3))
+        assertThat(ADD(listOf(1, 2), ListInputOutputDevice())).isEqualTo(OperationResult(3))
     }
 
     @Test
     fun `multiply to numbers`() {
-        assertThat(Operation.MULT(listOf(2, 3), InputOutputDevice())).isEqualTo(Result(6))
+        assertThat(MULT(listOf(2, 3), ListInputOutputDevice())).isEqualTo(OperationResult(6))
     }
 
     @Test
     fun `halt programm`() {
-        assertThat(Operation.HALT(emptyList(), InputOutputDevice())).isEqualTo(Result(null))
+        assertThat(HALT(emptyList(), ListInputOutputDevice())).isEqualTo(OperationResult(null))
     }
 
     @Test
     fun `too few params`() {
         assertThrows<IllegalArgumentException> {
-            Operation.ADD(listOf(1), InputOutputDevice())
+            ADD(listOf(1), ListInputOutputDevice())
         }
     }
 
@@ -46,11 +50,31 @@ class ParameterModesTest {
 
 }
 
-class ComputerTest {
+class QueueInputOutputTest {
+
+    @Test
+    fun `put input and take output`() {
+        val inOut = QueueInputOutputDevice()
+        inOut.putInput(42)
+        inOut.writeInt(inOut.nextInt())
+        assertThat(inOut.takeOutput()).isEqualTo(42)
+    }
+
+    @Test
+    fun `output is put to next device`() {
+        val nextDevice = QueueInputOutputDevice()
+        val inOut = QueueInputOutputDevice(nextDevice)
+
+        inOut.writeInt(42)
+        assertThat(nextDevice.nextInt()).isEqualTo(42)
+    }
+}
+
+class ListComputerTest {
 
     @Test
     fun `get memory value`() {
-        val computer = Computer(listOf(10, 20, 30))
+        val computer = ListComputer(listOf(10, 20, 30))
 
         assertThat(computer[0]).isEqualTo(10)
         assertThat(computer[1]).isEqualTo(20)
@@ -62,21 +86,21 @@ class ComputerTest {
 
     @Test
     fun `one plus one`() {
-        val computer = Computer(listOf(1, 0, 0, 0, 99)).apply { runProgram() }
+        val computer = ListComputer(listOf(1, 0, 0, 0, 99)).apply { runProgram() }
 
         assertThat(computer.dumpMemory()).containsExactly(2, 0, 0, 0, 99)
     }
 
     @Test
     fun `tree times two`() {
-        val computer = Computer(listOf(2, 3, 0, 3, 99)).apply { runProgram() }
+        val computer = ListComputer(listOf(2, 3, 0, 3, 99)).apply { runProgram() }
 
         assertThat(computer.dumpMemory()).containsExactly(2, 3, 0, 6, 99)
     }
 
     @Test
     fun `99 times 99`() {
-        val computer = Computer(listOf(2, 4, 4, 5, 99, 0)).apply { runProgram() }
+        val computer = ListComputer(listOf(2, 4, 4, 5, 99, 0)).apply { runProgram() }
 
         assertThat(computer.dumpMemory()).containsExactly(2, 4, 4, 5, 99, 9801)
     }
@@ -86,7 +110,7 @@ class ComputerTest {
         val program = listOf(3, 0, 4, 0, 99)
         val input = listOf(123)
 
-        val computer = Computer(program, input).apply {
+        val computer = ListComputer(program, input).apply {
             runProgram()
         }
 
@@ -97,14 +121,14 @@ class ComputerTest {
     fun `should evaluate with immediate mode`() {
         val program = listOf(1101, 1, 2, 0, 99)
 
-        val result = Computer(program).runProgram()
+        val result = ListComputer(program).runProgram()
 
         assertThat(result).isEqualTo(1 + 2)
     }
 
     @Test
     fun `should halt`() {
-        val result = Computer(listOf(1002, 4, 3, 4, 33)).runProgram()
+        val result = ListComputer(listOf(1002, 4, 3, 4, 33)).runProgram()
 
         assertThat(result).isEqualTo(1002)
     }
@@ -138,6 +162,23 @@ class ComputerTest {
         val p6 = listOf(3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1)
         assertThat(runProgramWithInput(p6, 0)).containsExactly(0)
         assertThat(runProgramWithInput(p6, 1)).containsExactly(1)
+    }
+
+}
+
+class QueueComputerTest {
+
+    @Test
+    fun `should run async and wait for input`() {
+        val program = listOf(READ.opcode, 0, WRITE.opcode, 0, WRITE.opcode, 0, HALT.opcode)
+        val computer = QueueComputer(program)
+
+        computer
+            .runAsync()
+            .putInput(42)
+
+        await() untilCallTo { computer.takeOutput() } matches { it == 42 }
+        assertThat(computer.output).containsExactly(42, 42)
     }
 
 }

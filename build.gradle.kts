@@ -23,6 +23,7 @@ tasks.named<Test>("test") {
 
 dependencies {
     val junitVersion = "5.5.2"
+    val awaitilityVersion = "4.0.1"
 
     implementation(kotlin("stdlib-jdk8"))
 
@@ -33,4 +34,6 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.awaitility:awaitility:$awaitilityVersion")
+    testImplementation("org.awaitility:awaitility-kotlin:$awaitilityVersion")
 }

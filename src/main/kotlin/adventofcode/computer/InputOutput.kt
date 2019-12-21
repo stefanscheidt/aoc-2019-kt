@@ -6,64 +6,64 @@ import java.util.concurrent.BlockingQueue
 
 
 interface InputOutputDevice {
-    fun nextInt(): Int
-    fun writeInt(i: Int)
-    val output: List<Int>
+    fun nextValue(): Long
+    fun writeValue(value: Long)
+    val output: List<Long>
 }
 
-class ListInputOutputDevice(input: List<Int> = emptyList()) : InputOutputDevice {
+class ListInputOutputDevice(input: List<Long> = emptyList()) : InputOutputDevice {
 
     private val inputStream = input.iterator()
-    private val outputStream = mutableListOf<Int>()
+    private val outputStream = mutableListOf<Long>()
 
-    override val output: List<Int>
+    override val output: List<Long>
         get() = outputStream.toList()
 
-    override fun nextInt(): Int =
+    override fun nextValue(): Long =
         inputStream.next()
 
-    override fun writeInt(i: Int) {
-        outputStream.add(i)
+    override fun writeValue(value: Long) {
+        outputStream.add(value)
     }
 
 }
 
 interface InputOutputQueue {
-    fun putInput(i: Int)
-    fun takeOutput(): Int
+    fun putInput(i: Long)
+    fun takeOutput(): Long
 }
 
 class QueueInputOutputDevice(
     private val nextDevice: QueueInputOutputDevice? = null
 ) : InputOutputDevice, InputOutputQueue {
 
-    private val inputQueue: BlockingQueue<Int> =
-        ArrayBlockingQueue<Int>(256)
-    private val outputQueue: BlockingQueue<Int> =
-        ArrayBlockingQueue<Int>(256)
-    private val outputStream: MutableList<Int> =
+    private val inputQueue: BlockingQueue<Long> =
+        ArrayBlockingQueue<Long>(256)
+    private val outputQueue: BlockingQueue<Long> =
+        ArrayBlockingQueue<Long>(256)
+    private val outputStream: MutableList<Long> =
         ArrayList()
 
-    override val output: List<Int>
+    override val output: List<Long>
         get() = outputStream.toList()
 
-    override fun nextInt(): Int =
+    override fun nextValue(): Long =
         inputQueue.take()
             .also { log(this, "took output $it") }
 
-    override fun writeInt(i: Int) {
-        log(this, "put input $i")
-        outputQueue.put(i)
-        outputStream.add(i)
-        nextDevice?.putInput(i)
+    override fun writeValue(value: Long) {
+        log(this, "put input $value")
+        outputQueue.put(value)
+        outputStream.add(value)
+        nextDevice?.putInput(value)
     }
 
-    override fun putInput(i: Int) {
+    override fun putInput(i: Long) {
         log(this, "put input $i")
         inputQueue.put(i)
     }
 
-    override fun takeOutput(): Int =
+    override fun takeOutput(): Long =
         outputQueue.take()
             .also { log(this, "took output $it") }
 

@@ -10,7 +10,7 @@ class QueueInputOutputTest {
     fun `put input and take output`() {
         val inOut = QueueInputOutputDevice()
         inOut.putInput(42)
-        inOut.writeInt(inOut.nextInt())
+        inOut.writeValue(inOut.nextValue())
         Assertions.assertThat(inOut.takeOutput()).isEqualTo(42)
     }
 
@@ -19,7 +19,7 @@ class QueueInputOutputTest {
         val nextDevice = QueueInputOutputDevice()
         val inOut = QueueInputOutputDevice(nextDevice)
 
-        inOut.writeInt(42)
-        Assertions.assertThat(nextDevice.nextInt()).isEqualTo(42)
+        inOut.writeValue(42)
+        Assertions.assertThat(nextDevice.nextValue()).isEqualTo(42)
     }
 }

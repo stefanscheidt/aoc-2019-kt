@@ -6,20 +6,14 @@ import org.awaitility.Awaitility.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 
 class ParameterModesTest {
 
     @Test
     fun `should parse parameter modes`() {
-        val parameterModes = parameterModes(1011)
-        assertThat(parameterModes.next()).isEqualTo(1)
-        assertThat(parameterModes.next()).isEqualTo(1)
-        assertThat(parameterModes.next()).isEqualTo(0)
-        assertThat(parameterModes.next()).isEqualTo(1)
-        assertThat(parameterModes.next()).isEqualTo(0)
-        assertThat(parameterModes.next()).isEqualTo(0)
+        assertThat(accessModes(1011).take(6).toList())
+            .containsExactly(1L, 1L, 0L, 1L, 0L, 0L)
     }
 
 }
@@ -33,9 +27,7 @@ class ListComputerTest {
         assertThat(computer[0]).isEqualTo(10)
         assertThat(computer[1]).isEqualTo(20)
         assertThat(computer[2]).isEqualTo(30)
-        assertThrows<IndexOutOfBoundsException> {
-            computer[3]
-        }
+        assertThat(computer[3]).isEqualTo(0)
     }
 
     @Test
@@ -61,8 +53,8 @@ class ListComputerTest {
 
     @Test
     fun `should read input and write output`() {
-        val program = listOf(3, 0, 4, 0, 99)
-        val input = listOf(123)
+        val program = listOf(3L, 0L, 4L, 0L, 99L)
+        val input = listOf(123L)
 
         val computer = ListComputer(program, input).apply {
             runProgram()
@@ -73,49 +65,49 @@ class ListComputerTest {
 
     @Test
     fun `should evaluate with immediate mode`() {
-        val program = listOf(1101, 1, 2, 0, 99)
+        val program = listOf(1101L, 1L, 2L, 0L, 99L)
 
         val result = ListComputer(program).runProgram()
 
-        assertThat(result).isEqualTo(1 + 2)
+        assertThat(result).isEqualTo(1L + 2L)
     }
 
     @Test
     fun `should halt`() {
-        val result = ListComputer(listOf(1002, 4, 3, 4, 33)).runProgram()
+        val result = ListComputer(listOf(1002L, 4L, 3L, 4L, 33L)).runProgram()
 
-        assertThat(result).isEqualTo(1002)
+        assertThat(result).isEqualTo(1002L)
     }
 
     @Test
     fun `should compare and jump`() {
-        val p1 = listOf(3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8)
-        assertThat(runProgramWithInput(p1, 7)).containsExactly(0)
-        assertThat(runProgramWithInput(p1, 8)).containsExactly(1)
-        assertThat(runProgramWithInput(p1, 9)).containsExactly(0)
+        val p1 = listOf(3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8).map { it.toLong() }
+        assertThat(runProgramWithInput(p1, 7L)).containsExactly(0L)
+        assertThat(runProgramWithInput(p1, 8L)).containsExactly(1L)
+        assertThat(runProgramWithInput(p1, 9L)).containsExactly(0L)
 
-        val p2 = listOf(3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8)
-        assertThat(runProgramWithInput(p2, 7)).containsExactly(1)
-        assertThat(runProgramWithInput(p2, 8)).containsExactly(0)
-        assertThat(runProgramWithInput(p2, 9)).containsExactly(0)
+        val p2 = listOf(3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8).map { it.toLong() }
+        assertThat(runProgramWithInput(p2, 7L)).containsExactly(1L)
+        assertThat(runProgramWithInput(p2, 8L)).containsExactly(0L)
+        assertThat(runProgramWithInput(p2, 9L)).containsExactly(0L)
 
-        val p3 = listOf(3, 3, 1108, -1, 8, 3, 4, 3, 99)
-        assertThat(runProgramWithInput(p3, 7)).containsExactly(0)
-        assertThat(runProgramWithInput(p3, 8)).containsExactly(1)
-        assertThat(runProgramWithInput(p3, 9)).containsExactly(0)
+        val p3 = listOf(3, 3, 1108, -1, 8, 3, 4, 3, 99).map { it.toLong() }
+        assertThat(runProgramWithInput(p3, 7L)).containsExactly(0L)
+        assertThat(runProgramWithInput(p3, 8L)).containsExactly(1L)
+        assertThat(runProgramWithInput(p3, 9L)).containsExactly(0L)
 
-        val p4 = listOf(3, 3, 1107, -1, 8, 3, 4, 3, 99)
-        assertThat(runProgramWithInput(p4, 7)).containsExactly(1)
-        assertThat(runProgramWithInput(p4, 8)).containsExactly(0)
-        assertThat(runProgramWithInput(p4, 9)).containsExactly(0)
+        val p4 = listOf(3, 3, 1107, -1, 8, 3, 4, 3, 99).map { it.toLong() }
+        assertThat(runProgramWithInput(p4, 7L)).containsExactly(1L)
+        assertThat(runProgramWithInput(p4, 8L)).containsExactly(0L)
+        assertThat(runProgramWithInput(p4, 9L)).containsExactly(0L)
 
-        val p5 = listOf(3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9)
-        assertThat(runProgramWithInput(p5, 0)).containsExactly(0)
-        assertThat(runProgramWithInput(p5, 1)).containsExactly(1)
+        val p5 = listOf(3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9).map { it.toLong() }
+        assertThat(runProgramWithInput(p5, 0)).containsExactly(0L)
+        assertThat(runProgramWithInput(p5, 1)).containsExactly(1L)
 
-        val p6 = listOf(3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1)
-        assertThat(runProgramWithInput(p6, 0)).containsExactly(0)
-        assertThat(runProgramWithInput(p6, 1)).containsExactly(1)
+        val p6 = listOf(3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1).map { it.toLong() }
+        assertThat(runProgramWithInput(p6, 0L)).containsExactly(0L)
+        assertThat(runProgramWithInput(p6, 1L)).containsExactly(1L)
     }
 
 }
@@ -131,7 +123,7 @@ class QueueComputerTest {
             .runAsync()
             .putInput(42)
 
-        await() untilCallTo { computer.takeOutput() } matches { it == 42 }
+        await() untilCallTo { computer.takeOutput() } matches { it == 42L }
         assertThat(computer.output).containsExactly(42, 42)
     }
 

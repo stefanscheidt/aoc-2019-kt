@@ -4,60 +4,68 @@ import adventofcode.util.log
 
 // --- Operations ---
 
-typealias Opcode = Int
+typealias Opcode = Long
 
-typealias Pointer = Int
+typealias Pointer = Long
 
-data class OperationResult(val value: Int?, val instructionPointer: Pointer? = null)
+data class OperationResult(
+    val value: Long? = null,
+    val instructionPointer: Pointer? = null,
+    val relativeBaseAdjustment: Long = 0
+)
 
 enum class Operation(val opcode: Opcode, val arity: Int) {
     ADD(1, 2) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): OperationResult =
-            OperationResult(args[0] + args[1])
+        override fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult =
+            OperationResult(value = args[0] + args[1])
     },
     MULT(2, 2) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): OperationResult =
-            OperationResult(args[0] * args[1])
+        override fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult =
+            OperationResult(value = args[0] * args[1])
     },
     READ(3, 0) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): OperationResult =
-            OperationResult(inOut.nextInt())
+        override fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult =
+            OperationResult(value = inOut.nextValue())
                 .also { log(this, "read input ${it.value}") }
     },
     WRITE(4, 1) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): OperationResult {
+        override fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult {
             log(this, "write output ${args[0]}")
-            inOut.writeInt(args[0])
-            return OperationResult(null)
+            inOut.writeValue(args[0])
+            return OperationResult()
         }
     },
     JUMP_TRUE(5, 2) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): OperationResult =
-            if (args[0] != 0) OperationResult(null, args[1]) else OperationResult(null)
+        override fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult =
+            if (args[0] != 0L) OperationResult(instructionPointer = args[1]) else OperationResult()
     },
     JUMP_FALSE(6, 2) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): OperationResult =
-            if (args[0] == 0) OperationResult(null, args[1]) else OperationResult(null)
+        override fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult =
+            if (args[0] == 0L) OperationResult(instructionPointer = args[1]) else OperationResult()
     },
     LESS_THAN(7, 2) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): OperationResult =
-            OperationResult(if (args[0] < args[1]) 1 else 0)
+        override fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult =
+            OperationResult(value = if (args[0] < args[1]) 1L else 0L)
     },
     EQUALS(8, 2) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): OperationResult =
-            OperationResult(if (args[0] == args[1]) 1 else 0)
+        override fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult =
+            OperationResult(value = if (args[0] == args[1]) 1L else 0L)
+    },
+    MOVE_BASE(9, 1) {
+        override fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult =
+            OperationResult(relativeBaseAdjustment = args[0])
     },
     HALT(99, 0) {
-        override fun eval(args: List<Int>, inOut: InputOutputDevice): OperationResult =
-            OperationResult(null)
+        override fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult =
+            OperationResult()
     };
 
-    operator fun invoke(args: List<Int>, inOut: InputOutputDevice): OperationResult {
+    operator fun invoke(args: List<Long>, inOut: InputOutputDevice): OperationResult {
         if (args.size != arity) throw IllegalArgumentException("wrong number of arguments")
         return eval(args, inOut)
     }
 
-    protected abstract fun eval(args: List<Int>, inOut: InputOutputDevice): OperationResult
+    protected abstract fun eval(args: List<Long>, inOut: InputOutputDevice): OperationResult
 
 }
 

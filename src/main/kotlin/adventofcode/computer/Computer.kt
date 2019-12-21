@@ -11,15 +11,11 @@ private const val ACCESS_MODE_POSTION = 0L
 private const val ACCESS_MODE_ABSOLUTE = 1L
 private const val ACCESS_MODE_RELATIVE = 2L
 
-private const val PARAM_MODE_POSITION = 0L
-private const val PARAM_MODE_ABSOLUTE = 1L
-private const val PARAM_MODE_RELATIV = 2L
-
 typealias Program = List<Long>
 
 class Memory(program: Program) {
 
-    private val ram = program
+    val ram = program
         .withIndex()
         .associate { it.index.toLong() to it.value }
         .toMutableMap()
@@ -56,7 +52,8 @@ sealed class Computer(
     program: Program
 ) : Runnable {
 
-    private val ram = program.withIndex().associate { it.index.toLong() to it.value }.toMutableMap()
+    private val memory = Memory(program)
+    private val ram = memory.ram
 
     var running = false
         private set
@@ -67,26 +64,27 @@ sealed class Computer(
         get() = inputOutputDevice.output
 
     fun runProgram(): Long {
-        log(this, "run programm")
         running = true
-        var ptr = 0L
         var base = 0L
+        var ptr = 0L
         do {
-            val header = ram[ptr++] ?: 0 // read
+            log(this, "B: $base IP: $ptr, Mem: ${memory.dump()}")
+            val header = memory.read(ptr++)
             val opcode = header % 100
             val operation = operations[opcode] ?: throw IllegalArgumentException("unknown opcode")
             val arity = operation.arity
-            val accessModes = accessModes(header / 100L).take(arity).toList()
+            val accessModes = accessModes(header / 100L, arity)
             val args = args(arity, accessModes, ptr, base).also { ptr += arity }
+            log(this, "Op: $operation, AM: $accessModes, Args: $args")
             val result = operation(args, inputOutputDevice).apply { base += relativeBaseAdjustment }
             if (result.instructionPointer != null)
                 ptr = result.instructionPointer
             else
-                result.value?.let { ram[ram[ptr++] ?: 0] = it }
+                result.value?.let { memory.write(ptr++, it, ACCESS_MODE_POSTION, base) }
+            log(this, "Res: $result")
         } while (operation != HALT)
-        log(this, "halt programm")
         running = false
-        return ram[0] ?: 0
+        return memory.read(0)
     }
 
     override fun run() {
@@ -94,27 +92,21 @@ sealed class Computer(
     }
 
     fun dumpMemory(): List<Long> =
-        ram.values.toList()
+        memory.dump()
 
     operator fun get(index: Long) =
-        ram[index] ?: 0
+        memory.read(index)
 
     operator fun set(index: Long, value: Long) {
-        ram[index] = value
+        memory.write(index, value)
     }
 
     private fun args(arity: Int, accessModes: List<Long>, pointer: Pointer, base: Long): List<Long> {
         if (arity == 0) return emptyList()
         val addresses = pointer until pointer + arity.toLong()
-        return addresses.zip(accessModes.take(arity).toList())
+        return addresses.zip(accessModes)
             .map { (address, accessMode) ->
-                val position = ram[address] ?: 0L
-                when (accessMode) {
-                    PARAM_MODE_ABSOLUTE -> position
-                    PARAM_MODE_POSITION -> ram[position]
-                    PARAM_MODE_RELATIV  -> ram[base + position]
-                    else                -> throw IllegalArgumentException("unknown parameter mode $accessMode")
-                } ?: 0
+                memory.read(address, accessMode, base)
             }
     }
 
@@ -159,9 +151,10 @@ class QueueComputerCluster(val nodes: List<QueueComputer>) : InputOutputQueue {
 
 }
 
-internal fun accessModes(pmcode: Long): Sequence<Long> =
-    generateSequence(Pair(pmcode % 10, pmcode / 10)) { Pair(it.second % 10, it.second / 10) }
+internal fun accessModes(code: Long, arity: Int): List<Long> =
+    generateSequence(Pair(code % 10, code / 10)) { Pair(it.second % 10, it.second / 10) }
         .map { it.first }
+        .take(arity).toList()
 
 // --- Utilities ---
 

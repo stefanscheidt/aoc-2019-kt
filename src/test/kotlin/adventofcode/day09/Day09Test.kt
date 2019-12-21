@@ -3,6 +3,7 @@ package adventofcode.day09
 import adventofcode.computer.loadProgram
 import adventofcode.computer.runProgramWithInput
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 
@@ -31,10 +32,11 @@ class Day09Test {
     }
 
     @Test
+    @Disabled
     fun `part one`() {
         val program = loadProgram("./input/day09.txt")
-        val output = runProgramWithInput(program, 1L)
-        assertThat(output).containsExactly(0L)
+        val testOutput = runProgramWithInput(program, 1L)
+        assertThat(testOutput).containsExactly(0L)
     }
 
 }

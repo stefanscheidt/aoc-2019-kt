@@ -12,7 +12,7 @@ class ParameterModesTest {
 
     @Test
     fun `should parse parameter modes`() {
-        assertThat(accessModes(1011).take(6).toList())
+        assertThat(accessModes(code = 1011, arity = 6))
             .containsExactly(1L, 1L, 0L, 1L, 0L, 0L)
     }
 

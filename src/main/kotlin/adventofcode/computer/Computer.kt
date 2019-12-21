@@ -73,14 +73,15 @@ sealed class Computer(
             val opcode = header % 100
             val operation = operations[opcode] ?: throw IllegalArgumentException("unknown opcode")
             val arity = operation.arity
-            val accessModes = accessModes(header / 100L, arity)
+            val accessModes = accessModes(header / 100L, arity + 1)
             val args = args(arity, accessModes, ptr, base).also { ptr += arity }
             log(this, "Op: $operation, AM: $accessModes, Args: $args")
             val result = operation(args, inputOutputDevice).apply { base += relativeBaseAdjustment }
-            if (result.instructionPointer != null)
+            if (result.instructionPointer != null) {
                 ptr = result.instructionPointer
-            else
-                result.value?.let { memory.write(ptr++, it, ACCESS_MODE_POSTION, base) }
+            } else {
+                result.value?.let { memory.write(ptr++, it, accessModes.last(), base) }
+            }
             log(this, "Res: $result")
         } while (operation != HALT)
         running = false
@@ -151,10 +152,10 @@ class QueueComputerCluster(val nodes: List<QueueComputer>) : InputOutputQueue {
 
 }
 
-internal fun accessModes(code: Long, arity: Int): List<Long> =
+internal fun accessModes(code: Long, count: Int): List<Long> =
     generateSequence(Pair(code % 10, code / 10)) { Pair(it.second % 10, it.second / 10) }
         .map { it.first }
-        .take(arity).toList()
+        .take(count).toList()
 
 // --- Utilities ---
 

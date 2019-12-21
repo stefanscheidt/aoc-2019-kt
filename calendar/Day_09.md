@@ -27,9 +27,20 @@ The computer's available memory should be much larger than the initial program. 
 The computer should have support for large numbers. Some instructions near the beginning of the BOOST program will verify this capability.
 Here are some example programs that use these features:
 
-109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99 takes no input and produces a copy of itself as output.
-1102,34915192,34915192,7,4,7,99,0 should output a 16-digit number.
-104,1125899906842624,99 should output the large number in the middle.
+* 109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99 takes no input and produces a copy of itself as output.
+* 1102,34915192,34915192,7,4,7,99,0 should output a 16-digit number.
+* 104,1125899906842624,99 should output the large number in the middle.
+
 The BOOST program will ask for a single input; run it in test mode by providing it the value 1. It will perform a series of checks on each opcode, output any opcodes (and the associated parameter modes) that seem to be functioning incorrectly, and finally output a BOOST keycode.
 
 Once your Intcode computer is fully functional, the BOOST program should report no malfunctioning opcodes when run in test mode; it should only output a single value, the BOOST keycode. What BOOST keycode does it produce?
+
+# Part Two
+
+You now have a complete Intcode computer.
+
+Finally, you can lock on to the Ceres distress signal! You just need to boost your sensors using the BOOST program.
+
+The program runs in sensor boost mode by providing the input instruction the value 2. Once run, it will boost the sensors automatically, but it might take a few seconds to complete the operation on slower hardware. In sensor boost mode, the program will output a single value: the coordinates of the distress signal.
+
+Run the BOOST program in sensor boost mode. What are the coordinates of the distress signal?

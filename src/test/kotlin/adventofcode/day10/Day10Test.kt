@@ -46,9 +46,9 @@ class Day10Test {
         val a = c(0, 0)
         val size = c(9, 9)
 
-        assertThat(ray(a, c(3, 1), size))
+        assertThat(rayBehind(a, c(3, 1), size))
             .containsExactlyInAnyOrder(c(6, 2), c(9, 3))
-        assertThat(ray(a, c(3, 3), size))
+        assertThat(rayBehind(a, c(3, 3), size))
             .containsExactlyInAnyOrder(c(4, 4), c(5, 5), c(6, 6), c(7, 7), c(8, 8), c(9, 9))
     }
 
@@ -122,10 +122,8 @@ data class Coordinate(val x: Int, val y: Int) {
 fun c(x: Int, y: Int): Coordinate =
     Coordinate(x, y)
 
-fun dist(c1: Coordinate, c2: Coordinate): Int =
-    abs(c2.x - c1.x) + abs(c2.y - c1.y)
-
-typealias AsteroidField = Set<Coordinate>
+typealias Asteroid = Coordinate
+typealias AsteroidField = Set<Asteroid>
 
 fun parseAsteroidField(map: String): AsteroidField {
     return map.split(System.lineSeparator()).withIndex()
@@ -139,13 +137,16 @@ fun parseAsteroidField(map: String): AsteroidField {
 fun size(field: AsteroidField): Coordinate =
     c(field.maxBy(Coordinate::x)?.x ?: 0, field.maxBy(Coordinate::y)?.y ?: 0)
 
-typealias Ray = Set<Coordinate>
-
-fun ray(a: Coordinate, b: Coordinate, size: Coordinate): Ray {
+fun vect(a: Coordinate, b: Coordinate): Coordinate {
     val dx = b.x - a.x
     val dy = b.y - a.y
     val gcd = gcd(abs(dx), abs(dy))
-    val v = c(dx / gcd, dy / gcd)
+    return c(dx / gcd, dy / gcd)
+}
+
+// excluding b
+fun rayBehind(a: Coordinate, b: Coordinate, size: Coordinate): Set<Coordinate> {
+    val v = vect(a, b)
     return generateSequence(b + v) { it + v }
         .takeWhile { it.x in (0..size.x) && it.y in (0..size.y) }
         .toSet()
@@ -154,7 +155,7 @@ fun ray(a: Coordinate, b: Coordinate, size: Coordinate): Ray {
 fun visibleAsteroids(asteroid: Coordinate, field: AsteroidField): AsteroidField {
     val size = size(field)
     val hiddenAsteroids = (field - asteroid)
-        .flatMap { ray(asteroid, it, size) }
+        .flatMap { rayBehind(asteroid, it, size) }
         .toSet()
     return field - asteroid - hiddenAsteroids
 }

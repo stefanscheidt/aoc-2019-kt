@@ -3,7 +3,9 @@ package adventofcode.day10
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.io.File
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.atan2
 
 
 class Day10Test {
@@ -112,11 +114,28 @@ class Day10Test {
         assertThat(optimalAsteroidForMonitoring(asteroids)).isEqualTo(c(17, 23) to 296)
     }
 
+    @Test
+    fun `part two`() {
+        val map = File("./input/day10.txt").readText()
+        val asteroids = parseAsteroidField(map)
+        val station = optimalAsteroidForMonitoring(asteroids)!!.first
+
+        val vaporized = vaporized(asteroids, station)
+
+        assertThat(vaporized[200 - 1]).isEqualTo(c(2, 4))
+    }
+
 }
 
 data class Coordinate(val x: Int, val y: Int) {
     operator fun plus(other: Coordinate): Coordinate =
         c(x + other.x, y + other.y)
+
+    operator fun unaryMinus(): Coordinate =
+        c(-x, -y)
+
+    operator fun minus(other: Coordinate): Coordinate =
+        this + (-other)
 }
 
 fun c(x: Int, y: Int): Coordinate =
@@ -152,19 +171,48 @@ fun rayBehind(a: Coordinate, b: Coordinate, size: Coordinate): Set<Coordinate> {
         .toSet()
 }
 
-fun visibleAsteroids(asteroid: Coordinate, field: AsteroidField): AsteroidField {
+fun visibleAsteroids(station: Asteroid, field: AsteroidField): AsteroidField {
+    val candidates = field - station
     val size = size(field)
-    val hiddenAsteroids = (field - asteroid)
-        .flatMap { rayBehind(asteroid, it, size) }
+    val hiddenAsteroids = candidates
+        .flatMap { rayBehind(station, it, size) }
         .toSet()
-    return field - asteroid - hiddenAsteroids
+    return candidates - hiddenAsteroids
 }
 
-fun optimalAsteroidForMonitoring(asteroids: AsteroidField): Pair<Coordinate, Int>? =
+fun optimalAsteroidForMonitoring(asteroids: AsteroidField): Pair<Asteroid, Int>? =
     asteroids
         .associateWith { visibleAsteroids(it, asteroids).size }
         .maxBy { it.value }
         ?.toPair()
+
+fun dist(c1: Coordinate, c2: Coordinate): Int =
+    abs(c1.x - c2.x) + abs(c1.y - c2.y)
+
+fun angle(target: Coordinate, station: Coordinate): Double {
+    val vector = target - station
+    return PI - atan2(vector.x.toDouble(), vector.y.toDouble())
+}
+
+fun vaporizedByOneRotation(asteroids: AsteroidField, station: Coordinate): List<Coordinate> =
+    (asteroids - station)
+        .groupBy { angle(it, station) }
+        .toSortedMap()
+        .mapValues { (_, xs) -> xs.minBy { x -> dist(x, station) } }
+        .values
+        .filterNotNull()
+        .toList()
+
+fun vaporized(asteroids: AsteroidField, station: Asteroid): List<Asteroid> {
+    var targets = asteroids - station
+    var result = emptyList<Coordinate>()
+    while (targets.isNotEmpty()) {
+        val vaporized = vaporizedByOneRotation(targets, station)
+        targets = targets - vaporized
+        result = result + vaporized
+    }
+    return result
+}
 
 fun gcd(a: Int, b: Int): Int =
     if (b == 0) a else gcd(b, a % b)

@@ -3,6 +3,7 @@ package adventofcode.computer
 import adventofcode.util.log
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.TimeUnit
 
 
 interface InputOutputDevice {
@@ -31,6 +32,7 @@ class ListInputOutputDevice(input: List<Long> = emptyList()) : InputOutputDevice
 interface InputOutputQueue {
     fun putInput(i: Long)
     fun takeOutput(): Long
+    fun pollOutput(timeout: Long, unit: TimeUnit): Long?
 }
 
 class QueueInputOutputDevice(
@@ -49,10 +51,10 @@ class QueueInputOutputDevice(
 
     override fun nextValue(): Long =
         inputQueue.take()
-            .also { log(this, "took output $it") }
+            .also { log(this, "provide next input value $it") }
 
     override fun writeValue(value: Long) {
-        log(this, "put input $value")
+        log(this, "write next output value $value")
         outputQueue.put(value)
         outputStream.add(value)
         nextDevice?.putInput(value)
@@ -66,5 +68,9 @@ class QueueInputOutputDevice(
     override fun takeOutput(): Long =
         outputQueue.take()
             .also { log(this, "took output $it") }
+
+    override fun pollOutput(timeout: Long, unit: TimeUnit): Long? =
+        outputQueue.poll(timeout, unit)
+            .also { log(this, "poll output $it") }
 
 }

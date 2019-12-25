@@ -13,3 +13,8 @@ data class Coordinate(val x: Int, val y: Int) {
 
 fun c(x: Int, y: Int): Coordinate =
     Coordinate(x, y)
+
+typealias Vector = Coordinate
+
+fun vect(x: Int, y: Int): Vector =
+    c(x, y)

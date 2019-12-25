@@ -4,6 +4,7 @@ import adventofcode.computer.Operation.HALT
 import adventofcode.util.log
 import java.io.File
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 // --- Computer ---
 
@@ -53,7 +54,6 @@ sealed class Computer(
 ) : Runnable {
 
     private val memory = Memory(program)
-    private val ram = memory.ram
 
     var running = false
         private set
@@ -149,6 +149,9 @@ class QueueComputerCluster(val nodes: List<QueueComputer>) : InputOutputQueue {
 
     override fun takeOutput(): Long =
         nodes.last().takeOutput()
+
+    override fun pollOutput(timeout: Long, unit: TimeUnit): Long? =
+        nodes.last().pollOutput(timeout, unit)
 
 }
 

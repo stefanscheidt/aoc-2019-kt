@@ -7,7 +7,6 @@ import adventofcode.common.vect
 import adventofcode.computer.QueueComputer
 import adventofcode.computer.loadProgram
 import adventofcode.day11.Direction.NORTH
-import adventofcode.util.log
 import java.util.concurrent.TimeUnit
 
 typealias Color = Long
@@ -41,46 +40,52 @@ enum class Direction(val vector: Vector) {
 
 typealias Painting = Map<Coordinate, Color>
 
-class Robot(private val brain: QueueComputer, private val initialColor: Color) {
+class Robot(private val brain: QueueComputer, initialColor: Color) {
 
-    private val paintedFields = mutableMapOf<Coordinate, Color>()
+    private var currentPosition = c(0, 0)
+    private var currentDirection = NORTH
+
+    private val paintedFields = mutableMapOf<Coordinate, Color>().apply {
+        put(currentPosition, initialColor)
+    }
     val painting: Painting
         get() = paintedFields.toMap()
 
-    private var currentDirection = NORTH
-    private var currentPosition = c(0, 0)
     private val currentColor: Color
         get() = paintedFields[currentPosition] ?: BLACK
 
     fun start() {
-        paintedFields[currentPosition] = initialColor
-        brain.putInput(currentColor)
         brain.runAsync()
-        log(this, "poll next output")
-        var nextColor = brain.pollOutput(1, TimeUnit.SECONDS) ?: return
-        var nextTurn = brain.pollOutput(1, TimeUnit.SECONDS) ?: return
-        while (brain.running) {
-            paintedFields[currentPosition] = nextColor
-            when (nextTurn) {
-                0L -> currentDirection = currentDirection.turnLeft()
-                1L -> currentDirection = currentDirection.turnRight()
-            }
-            currentPosition += currentDirection.vector
-            log(this, "put color $currentColor from position $currentPosition")
-            brain.putInput(currentColor)
-            log(this, "poll next output")
-            nextColor = brain.pollOutput(1, TimeUnit.SECONDS) ?: break
-            nextTurn = brain.pollOutput(1, TimeUnit.SECONDS) ?: break
+        while (true) {
+            putInput()
+            val nextColor = pollOutput() ?: return
+            val nextTurn = pollOutput() ?: return
+            updateState(nextColor, nextTurn)
         }
+    }
+
+    private fun putInput() = brain.putInput(currentColor)
+
+    private fun pollOutput() = brain.pollOutput(1, TimeUnit.SECONDS)
+
+    private fun updateState(nextColor: Long, nextTurn: Long) {
+        paintedFields[currentPosition] = nextColor
+        when (nextTurn) {
+            0L -> currentDirection = currentDirection.turnLeft()
+            1L -> currentDirection = currentDirection.turnRight()
+        }
+        currentPosition += currentDirection.vector
     }
 
 }
 
 fun renderPainting(painting: Painting): String {
-    val minX = painting.keys.map { it.x }.min() ?: 0
-    val maxX = painting.keys.map { it.x }.max() ?: 0
-    val minY = painting.keys.map { it.y }.min() ?: 0
-    val maxY = painting.keys.map { it.y }.max() ?: 0
+    val xs = painting.keys.map { it.x }
+    val minX = xs.min() ?: 0
+    val maxX = xs.max() ?: 0
+    val ys = painting.keys.map { it.y }
+    val minY = ys.min() ?: 0
+    val maxY = ys.max() ?: 0
     return (minY..maxY)
         .joinToString(separator = System.lineSeparator()) { y ->
             (minX..maxX)

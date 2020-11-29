@@ -1,6 +1,6 @@
 plugins {
-    val kotlinVersion = "1.3.61"
-    kotlin("jvm") version kotlinVersion
+    kotlin("jvm") version "1.4.20"
+    id("com.github.ben-manes.versions") version "0.36.0"
 }
 
 repositories {
@@ -9,11 +9,11 @@ repositories {
 
 tasks {
     compileKotlin {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "11"
         kotlinOptions.freeCompilerArgs += arrayOf("-Xinline-classes")
     }
     compileTestKotlin {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "11"
     }
 }
 
@@ -22,15 +22,16 @@ tasks.named<Test>("test") {
 }
 
 dependencies {
-    val junitVersion = "5.5.2"
-    val awaitilityVersion = "4.0.1"
+    val awaitilityVersion = "4.0.3"
+    val assertjVersion = "3.18.1"
+    val junitVersion = "5.7.0"
 
     implementation(kotlin("stdlib-jdk8"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
-    testImplementation("org.assertj:assertj-core:3.14.0")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

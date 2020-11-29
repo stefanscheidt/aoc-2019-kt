@@ -1,2 +1,2 @@
-rootProject.name = "adventofcode-kt"
+rootProject.name = "aoc-2019-kt"
 

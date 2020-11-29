@@ -25,3 +25,6 @@
 *.png binary
 *.jpg binary
 *.gif binary
+
+# These are explicitly windows files and should use crlf
+*.bat text eol=crlf

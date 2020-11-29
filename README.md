@@ -1,3 +1,3 @@
-# Advent of Code 2010, using Kotlin
+# Advent of Code 2019, using Kotlin
 
-See <https://adventofcode.com/>, <https://kotlinlang.org/>.
+See <https://adventofcode.com/2019>, <https://kotlinlang.org/>.

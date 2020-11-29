@@ -39,10 +39,10 @@ private fun parseMove(move: String): Move {
     val code = move[0]
     val steps = move.substring(1).toInt()
     return when (code) {
-        'U'  -> Up(steps)
-        'D'  -> Down(steps)
-        'L'  -> Left(steps)
-        'R'  -> Right(steps)
+        'U' -> Up(steps)
+        'D' -> Down(steps)
+        'L' -> Left(steps)
+        'R' -> Right(steps)
         else -> throw IllegalArgumentException("invalid move code $code")
     }
 }

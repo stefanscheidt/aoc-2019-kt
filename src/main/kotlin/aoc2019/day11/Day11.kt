@@ -23,17 +23,17 @@ enum class Direction(val vector: Vector) {
     fun turnRight(): Direction =
         when (this) {
             NORTH -> EAST
-            EAST  -> SOUTH
+            EAST -> SOUTH
             SOUTH -> WEST
-            WEST  -> NORTH
+            WEST -> NORTH
         }
 
     fun turnLeft(): Direction =
         when (this) {
             NORTH -> WEST
-            WEST  -> SOUTH
+            WEST -> SOUTH
             SOUTH -> EAST
-            EAST  -> NORTH
+            EAST -> NORTH
         }
 
 }

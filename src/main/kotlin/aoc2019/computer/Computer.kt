@@ -25,9 +25,9 @@ class Memory(program: Program) {
         val position = ram[address] ?: 0L
         return when (accessMode) {
             ACCESS_MODE_ABSOLUTE -> position
-            ACCESS_MODE_POSTION  -> ram[position] ?: 0L
+            ACCESS_MODE_POSTION -> ram[position] ?: 0L
             ACCESS_MODE_RELATIVE -> ram[base + position] ?: 0L
-            else                 -> throw IllegalArgumentException("unknown access mode $accessMode")
+            else -> throw IllegalArgumentException("unknown access mode $accessMode")
         }
     }
 
@@ -38,9 +38,9 @@ class Memory(program: Program) {
         val position = ram[address] ?: 0L
         when (accessMode) {
             ACCESS_MODE_ABSOLUTE -> ram[address] = value
-            ACCESS_MODE_POSTION  -> ram[position] = value
+            ACCESS_MODE_POSTION -> ram[position] = value
             ACCESS_MODE_RELATIVE -> ram[base + position] = value
-            else                 -> throw IllegalArgumentException("unknown access mode $accessMode")
+            else -> throw IllegalArgumentException("unknown access mode $accessMode")
         }
     }
 
